@@ -1,0 +1,2 @@
+## Hello World Tutorial
+This folder contains code from following the tutorial at this link: https://docs.microsoft.com/en-us/windows/mixed-reality/develop/javascript/tutorials/babylonjs-webxr-helloworld/introduction-01
