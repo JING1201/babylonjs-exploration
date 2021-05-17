@@ -81,14 +81,17 @@ var createScene = async function () {
                 console.log("POINTER DOWN");
                 if(pointerInfo.pickInfo.hit) {
                     pointerInfo.pickInfo.pickedMesh.position.y -= 0.5;
-                    pointerToKey.set(pointerInfo.event.pointerId, pointerInfo.pickInfo.pickedMesh);
-                    piano.play(pointerInfo.pickInfo.pickedMesh.name);
+                    pointerToKey.set(pointerInfo.event.pointerId, {
+                        mesh: pointerInfo.pickInfo.pickedMesh,
+                        note: piano.play(pointerInfo.pickInfo.pickedMesh.name)
+                    });
                 }
                 break;
             case BABYLON.PointerEventTypes.POINTERUP:
                 console.log("POINTER UP");
                 if (pointerToKey.has(pointerInfo.event.pointerId)) {
-                    pointerToKey.get(pointerInfo.event.pointerId).position.y += 0.5;
+                    pointerToKey.get(pointerInfo.event.pointerId).mesh.position.y += 0.5;
+                    pointerToKey.get(pointerInfo.event.pointerId).note.stop();
                     pointerToKey.delete(pointerInfo.event.pointerId);
                 }
                 break;
