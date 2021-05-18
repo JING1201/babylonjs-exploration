@@ -16,7 +16,7 @@ const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePosit
             top.position.x += topPositionX/scale;
 
             const key = BABYLON.Mesh.MergeMeshes([bottom, top], true, false, null, false, false);
-            key.position.x = referencePositionX + wholePositionX/scale;
+            key.position.x = referencePositionX/scale + wholePositionX/scale;
             key.name = note+octave;
             
             key.position.y += keyHeight/scale;
@@ -38,7 +38,7 @@ const BlackKey = function (note, positionX) {
             const key = BABYLON.MeshBuilder.CreateBox(note+octave, {width: 1.4/scale, height: 2/scale, depth: 5/scale}, scene);
             key.position.z += 4.75/scale;
             key.position.y += 0.25/scale;
-            key.position.x = referencePositionX + positionX/scale;
+            key.position.x = referencePositionX/scale + positionX/scale;
             key.material = blackMat;
             
             key.position.y += keyHeight/scale;
@@ -69,27 +69,43 @@ const createScene = async function () {
 
     const keyParams = [
         WhiteKey("C", 1.4, 2.3, -0.45, -2.4*6),
+        BlackKey("C#", -2.4*6+0.95),
         WhiteKey("D", 1.4, 2.4, 0, -2.4*5),
+        BlackKey("D#", -2.4*6+0.95+2.85),
         WhiteKey("E", 1.4, 2.3, 0.45, -2.4*4),
         WhiteKey("F", 1.3, 2.4, -0.55, -2.4*3),
-        WhiteKey("G", 1.3, 2.3, -0.2, -2.4*2),
-        WhiteKey("A", 1.3, 2.3, 0.2, -2.4*1),
-        WhiteKey("B", 1.3, 2.4, 0.55, 0),
-        BlackKey("C#", -2.4*6+0.95),
-        BlackKey("D#", -2.4*6+0.95+2.85),
         BlackKey("F#", -2.4*6+0.95+0.45 + 2.4 * 2 + 1.85),
+        WhiteKey("G", 1.3, 2.3, -0.2, -2.4*2),
         BlackKey("G#", -2.4*6+0.95+0.45 + 2.4 * 2 + 1.85 + 2.75),
+        WhiteKey("A", 1.3, 2.3, 0.2, -2.4*1),
         BlackKey("A#", -2.4*6+0.95+0.45 + 2.4 * 2 + 1.85 + 2.75 *2),
+        WhiteKey("B", 1.3, 2.4, 0.55, 0)
     ]
 
     const keys = new Set();
+
+    //Octave 0
+    keys.add(WhiteKey("A", 1.9, 2.3, -0.20, -2.4).build(scene, 0, -2.4*21))
+    keyParams.slice(10, 12).forEach(key => {
+        keys.add(key.build(scene, 0, -2.4*21))
+    })
+
+    //Octave 1-7
     var referencePositionX = -2.4*14;
-    for (var octave=2; octave<=6; octave++) {
+    for (var octave=1; octave<=7; octave++) {
         keyParams.forEach(key => {
             keys.add(key.build(scene, octave, referencePositionX))
         })
         referencePositionX += 2.4*7;
     }
+
+    //Octave 8
+    keys.add(WhiteKey("C", 2.3, 2.3, 0, -2.4*6).build(scene, 8, referencePositionX))
+
+    const frameLeft = BABYLON.MeshBuilder.CreateBox("frameLeft", {width: 2/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
+    frameLeft.position = new BABYLON.Vector3(-2.4*23, (keyHeight+2)/2, 4);
+    const frameRight = BABYLON.MeshBuilder.CreateBox("frameRight", {width: 2/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
+    frameRight.position = new BABYLON.Vector3(referencePositionX-2.4*5, (keyHeight+2)/2, 4);
     
 
     const pointerToKey = new Map()
