@@ -102,11 +102,21 @@ const createScene = async function () {
     //Octave 8
     keys.add(WhiteKey("C", 2.3, 2.3, 0, -2.4*6).build(scene, 8, referencePositionX))
 
-    const frameLeft = BABYLON.MeshBuilder.CreateBox("frameLeft", {width: 2/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
-    frameLeft.position = new BABYLON.Vector3(-2.4*23, (keyHeight+2)/2, 4);
-    const frameRight = BABYLON.MeshBuilder.CreateBox("frameRight", {width: 2/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
-    frameRight.position = new BABYLON.Vector3(referencePositionX-2.4*5, (keyHeight+2)/2, 4);
-    
+    // Piano Frame
+    const frameLeft = BABYLON.MeshBuilder.CreateBox("frameLeft", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
+    frameLeft.position = new BABYLON.Vector3(-2.4*23/scale, (keyHeight+2)/2/scale, 4/scale);
+    const frameRight = BABYLON.MeshBuilder.CreateBox("frameRight", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
+    frameRight.position = new BABYLON.Vector3((referencePositionX-2.4*5)/scale, (keyHeight+2)/2/scale, 4/scale);
+    const frameBack = BABYLON.MeshBuilder.CreateBox("frameBack", {width: (2.4*52)/scale, height: (keyHeight+10)/scale, depth: 5/scale}, scene);
+    frameBack.position = new BABYLON.Vector3(2.4*3.5, (keyHeight+10)/2/scale, 9/scale);
+    const wingLeft = BABYLON.MeshBuilder.CreateBox("wingLeft", {width: 2.4/scale, height: 8/scale, depth: 5/scale}, scene);
+    wingLeft.position =  new BABYLON.Vector3(-2.4*23/scale, (keyHeight+6)/scale, 9/scale);
+    const wingRight = BABYLON.MeshBuilder.CreateBox("wingRight", {width: 2.4/scale, height: 8/scale, depth: 5/scale}, scene);
+    wingRight.position =  new BABYLON.Vector3((referencePositionX-2.4*5)/scale, (keyHeight+6)/scale, 9/scale);
+    const frame = BABYLON.Mesh.MergeMeshes([frameLeft, frameRight, frameBack, wingLeft, wingRight], true, false, null, false, false);
+    const frameMat = new BABYLON.StandardMaterial("frameMat");
+    frameMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    frame.material = frameMat;
 
     const pointerToKey = new Map()
     const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
@@ -139,7 +149,7 @@ const createScene = async function () {
     });
 
     const groundMat = new BABYLON.StandardMaterial("groundMat");
-    groundMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    groundMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
     const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
     ground.material = groundMat;
 
