@@ -85,7 +85,7 @@ const createScene = async function (engine) {
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
     // Default intensity is 1. Let's dim the light a small amount
-    // light.intensity = 0.6;
+    light.intensity = 0.6;
 
     const keyParams = [
         WhiteKey("C", 1.4, 2.3, -0.45, -2.4*6),
