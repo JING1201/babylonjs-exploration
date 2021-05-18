@@ -30,7 +30,7 @@ const BlackKey = function (note, positionX) {
     return {
         note: note,
         positionX: positionX,
-        
+
         build(scene, octave, referencePositionX) {
             const blackMat = new BABYLON.StandardMaterial("black");
             blackMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
@@ -56,8 +56,8 @@ var createScene = async function () {
 
     // This creates and positions a free camera (non-mesh)
     const alpha =  3*Math.PI/2;
-    const beta = Math.PI/6;
-    const radius = 1000/scale;
+    const beta = Math.PI/50;
+    const radius = 220/scale;
     const target = new BABYLON.Vector3(0, 0, 0);
     
     const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
@@ -101,8 +101,6 @@ var createScene = async function () {
         
         switch (pointerInfo.type) {
             case BABYLON.PointerEventTypes.POINTERDOWN:
-                console.log(pointerInfo);
-                console.log("POINTER DOWN");
                 if(pointerInfo.pickInfo.hit) {
                     const pickedMesh = pointerInfo.pickInfo.pickedMesh;
                     const pointerId = pointerInfo.event.pointerId;
@@ -116,7 +114,6 @@ var createScene = async function () {
                 }
                 break;
             case BABYLON.PointerEventTypes.POINTERUP:
-                console.log("POINTER UP");
                 const pointerId = pointerInfo.event.pointerId;
                 if (pointerToKey.has(pointerId)) {
                     pointerToKey.get(pointerId).mesh.position.y += 0.5/scale;
@@ -131,9 +128,9 @@ var createScene = async function () {
     const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
     ground.position.x -= 0.1;
 
-    // const xrHelper = await scene.createDefaultXRExperienceAsync({
-    //     floorMeshes: [ground]
-    // });
+    const xrHelper = await scene.createDefaultXRExperienceAsync({
+        floorMeshes: [ground]
+    });
     
     // const featureManager = xrHelper.baseExperience.featuresManager;
 
