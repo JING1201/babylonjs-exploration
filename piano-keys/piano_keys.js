@@ -1,5 +1,5 @@
 const scale = 1;
-const keyHeight = 130;
+const keyHeight = 60;
 
 const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePositionX) {
     return {
@@ -51,10 +51,8 @@ const BlackKey = function (note, positionX) {
 
 
 var createScene = async function () {
-    // This creates a basic Babylon Scene object (non-mesh)
     const scene = new BABYLON.Scene(engine);
 
-    // This creates and positions a free camera (non-mesh)
     const alpha =  3*Math.PI/2;
     const beta = Math.PI/50;
     const radius = 220/scale;
@@ -67,7 +65,7 @@ var createScene = async function () {
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
     // Default intensity is 1. Let's dim the light a small amount
-    light.intensity = 0.7;
+    light.intensity = 0.6;
 
     const keyParams = [
         WhiteKey("C", 1.4, 2.3, -0.45, -2.4*6),
@@ -85,7 +83,7 @@ var createScene = async function () {
     ]
 
     const keys = new Set();
-    var referencePositionX = -2.4*7;
+    var referencePositionX = -2.4*14;
     for (var octave=2; octave<=6; octave++) {
         keyParams.forEach(key => {
             keys.add(key.build(scene, octave, referencePositionX))
@@ -93,12 +91,10 @@ var createScene = async function () {
         referencePositionX += 2.4*7;
     }
 
-    let pointerToKey = new Map()
-
-    let piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
+    const pointerToKey = new Map()
+    const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
 
     scene.onPointerObservable.add((pointerInfo) => {
-        
         switch (pointerInfo.type) {
             case BABYLON.PointerEventTypes.POINTERDOWN:
                 if(pointerInfo.pickInfo.hit) {
@@ -127,6 +123,9 @@ var createScene = async function () {
 
     const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
     ground.position.x -= 0.1;
+    const groundMat = new BABYLON.StandardMaterial("groundMat");
+    groundMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    ground.material = groundMat;
 
     const xrHelper = await scene.createDefaultXRExperienceAsync({
         floorMeshes: [ground]
