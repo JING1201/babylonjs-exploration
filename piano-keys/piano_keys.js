@@ -50,7 +50,7 @@ const BlackKey = function (note, positionX) {
 
 
 
-var createScene = async function () {
+const createScene = async function () {
     const scene = new BABYLON.Scene(engine);
 
     const alpha =  3*Math.PI/2;
@@ -90,6 +90,7 @@ var createScene = async function () {
         })
         referencePositionX += 2.4*7;
     }
+    
 
     const pointerToKey = new Map()
     const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
@@ -121,10 +122,9 @@ var createScene = async function () {
 
     });
 
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
-    ground.position.x -= 0.1;
     const groundMat = new BABYLON.StandardMaterial("groundMat");
     groundMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
     ground.material = groundMat;
 
     const xrHelper = await scene.createDefaultXRExperienceAsync({
