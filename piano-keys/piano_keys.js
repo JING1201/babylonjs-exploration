@@ -156,15 +156,21 @@ const createScene = async function () {
     const xrHelper = await scene.createDefaultXRExperienceAsync();
     
     const featuresManager = xrHelper.baseExperience.featuresManager;
+    
+    const pointerSelection = featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable" /* or latest */, {
+        xrInput: xrHelper.input,
+        enablePointerSelectionOnAllControllers: true        
+    });
+
     const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
         xrInput: xrHelper.input,
         floorMeshes: [ground],
         snapPositions: [new BABYLON.Vector3(2.4*3.5/scale, 0, -10/scale)],
-      });
+    });
 
-    // featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
-    //     xrInput: xrHelper.input,
-    // });
+    const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
+        xrInput: xrHelper.input,
+    });
 
     return scene;
 };
