@@ -48,7 +48,7 @@ const BlackKey = function (note, positionX) {
     }
 }
 
-const buildFrame = function(leftPositionX, rightPositionX) {
+const buildFrame = function(scene, leftPositionX, rightPositionX) {
     const frameLeft = BABYLON.MeshBuilder.CreateBox("frameLeft", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
     frameLeft.position = new BABYLON.Vector3(leftPositionX/scale, (keyHeight+2)/2/scale, 4/scale);
     const frameRight = BABYLON.MeshBuilder.CreateBox("frameRight", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
@@ -70,7 +70,7 @@ const buildFrame = function(leftPositionX, rightPositionX) {
 
 
 
-const createScene = async function () {
+const createScene = async function (engine) {
     const scene = new BABYLON.Scene(engine);
 
     const alpha =  3*Math.PI/2;
@@ -85,7 +85,7 @@ const createScene = async function () {
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
     // Default intensity is 1. Let's dim the light a small amount
-    light.intensity = 0.6;
+    // light.intensity = 0.6;
 
     const keyParams = [
         WhiteKey("C", 1.4, 2.3, -0.45, -2.4*6),
@@ -123,7 +123,7 @@ const createScene = async function () {
     keys.add(WhiteKey("C", 2.3, 2.3, 0, -2.4*6).build(scene, 8, referencePositionX))
 
     // Piano Frame
-    const frame = buildFrame(-2.4*23, referencePositionX-2.4*5)
+    const frame = buildFrame(scene, -2.4*23, referencePositionX-2.4*5)
 
     const pointerToKey = new Map()
     const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
@@ -175,9 +175,9 @@ const createScene = async function () {
         snapPositions: [new BABYLON.Vector3(2.4*3.5/scale, 0, -10/scale)],
     });
 
-    const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
-        xrInput: xrHelper.input,
-    });
+    // const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
+    //     xrInput: xrHelper.input,
+    // });
 
     return scene;
 };

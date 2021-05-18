@@ -20,7 +20,7 @@
         const engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
 
         // Register a render loop to repeatedly render the scene
-        createScene().then(sceneToRender => {
+        createScene(engine).then(sceneToRender => {
             engine.runRenderLoop(() => sceneToRender.render());
         });
 
