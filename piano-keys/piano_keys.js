@@ -1,5 +1,5 @@
-const scale = 1;
-const keyHeight = 60;
+const scale = 65;
+const keyHeight = 80;
 
 const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePositionX) {
     return {
@@ -108,7 +108,7 @@ const createScene = async function () {
     const frameRight = BABYLON.MeshBuilder.CreateBox("frameRight", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
     frameRight.position = new BABYLON.Vector3((referencePositionX-2.4*5)/scale, (keyHeight+2)/2/scale, 4/scale);
     const frameBack = BABYLON.MeshBuilder.CreateBox("frameBack", {width: (2.4*52)/scale, height: (keyHeight+10)/scale, depth: 5/scale}, scene);
-    frameBack.position = new BABYLON.Vector3(2.4*3.5, (keyHeight+10)/2/scale, 9/scale);
+    frameBack.position = new BABYLON.Vector3(2.4*3.5/scale, (keyHeight+10)/2/scale, 9/scale);
     const wingLeft = BABYLON.MeshBuilder.CreateBox("wingLeft", {width: 2.4/scale, height: 8/scale, depth: 5/scale}, scene);
     wingLeft.position =  new BABYLON.Vector3(-2.4*23/scale, (keyHeight+6)/scale, 9/scale);
     const wingRight = BABYLON.MeshBuilder.CreateBox("wingRight", {width: 2.4/scale, height: 8/scale, depth: 5/scale}, scene);
@@ -153,13 +153,16 @@ const createScene = async function () {
     const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
     ground.material = groundMat;
 
-    const xrHelper = await scene.createDefaultXRExperienceAsync({
-        floorMeshes: [ground]
-    });
+    const xrHelper = await scene.createDefaultXRExperienceAsync();
     
-    // const featureManager = xrHelper.baseExperience.featuresManager;
+    const featuresManager = xrHelper.baseExperience.featuresManager;
+    const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
+        xrInput: xrHelper.input,
+        floorMeshes: [ground],
+        snapPositions: [new BABYLON.Vector3(2.4*3.5/scale, 0, -10/scale)],
+      });
 
-    // featureManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
+    // featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
     //     xrInput: xrHelper.input,
     // });
 
