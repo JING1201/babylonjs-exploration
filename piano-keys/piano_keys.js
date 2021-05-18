@@ -1,62 +1,66 @@
+const scale = 1;
+const keyHeight = 130;
 
-const WhiteKey = function (name, topWidth, bottomWidth, topPositionX, wholePositionX) {
+const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePositionX) {
     return {
-        name: name,
+        note: note,
         topWidth: topWidth,
         bottomWidth: bottomWidth,
         topPositionX: topPositionX,
         wholePositionX: wholePositionX,
-        build(scene) {
-            var bottom = BABYLON.MeshBuilder.CreateBox("whiteKeyBottom", {width: bottomWidth, height: 1.5, depth: 4.5}, scene);
-            var top = BABYLON.MeshBuilder.CreateBox("whiteKeyTop", {width: topWidth, height: 1.5, depth: 5}, scene);
-            top.position.z += 4.75;
-            top.position.x += topPositionX;
+
+        build(scene, octave, referencePositionX) {
+            var bottom = BABYLON.MeshBuilder.CreateBox("whiteKeyBottom", {width: bottomWidth/scale, height: 1.5/scale, depth: 4.5/scale}, scene);
+            var top = BABYLON.MeshBuilder.CreateBox("whiteKeyTop", {width: topWidth/scale, height: 1.5/scale, depth: 5/scale}, scene);
+            top.position.z =  4.75/scale;
+            top.position.x += topPositionX/scale;
+
             const key = BABYLON.Mesh.MergeMeshes([bottom, top], true, false, null, false, false);
-            key.position.x = wholePositionX;
-            key.name = name;
+            key.position.x = referencePositionX + wholePositionX/scale;
+            key.name = note+octave;
+            
+            key.position.y += keyHeight/scale;
+
+            return key;
         }
     }
 }
 
-const BlackKey = function (name, positionX) {
+const BlackKey = function (note, positionX) {
     return {
-        name: name,
+        note: note,
         positionX: positionX,
-        build(scene) {
+        
+        build(scene, octave, referencePositionX) {
             const blackMat = new BABYLON.StandardMaterial("black");
             blackMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
-            const key = BABYLON.MeshBuilder.CreateBox(name, {width: 1.4, height: 2, depth: 5}, scene);
-            key.position.z += 4.75;
-            key.position.y += 0.25;
-            key.position.x = positionX;
+            const key = BABYLON.MeshBuilder.CreateBox(note+octave, {width: 1.4/scale, height: 2/scale, depth: 5/scale}, scene);
+            key.position.z += 4.75/scale;
+            key.position.y += 0.25/scale;
+            key.position.x = referencePositionX + positionX/scale;
             key.material = blackMat;
+            
+            key.position.y += keyHeight/scale;
+
+            return key;
         }
     }
 }
 
-const keys = [
-    WhiteKey("C4", 1.4, 2.3, -0.45, -2.4*7),
-    WhiteKey("D4", 1.4, 2.4, 0, -2.4*6),
-    WhiteKey("E4", 1.4, 2.3, 0.45, -2.4*5),
-    WhiteKey("F4", 1.3, 2.4, -0.55, -2.4*4),
-    WhiteKey("G4", 1.3, 2.3, -0.2, -2.4*3),
-    WhiteKey("A4", 1.3, 2.3, 0.2, -2.4*2),
-    WhiteKey("B4", 1.3, 2.4, 0.55, -2.4*1),
-    BlackKey("C#4", -2.4*7+0.95),
-    BlackKey("D#4", -2.4*7+0.95+2.85),
-    BlackKey("F#4", -2.4*7+0.95+0.45 + 2.4 * 2 + 1.85),
-    BlackKey("G#4", -2.4*7+0.95+0.45 + 2.4 * 2 + 1.85 + 2.75),
-    BlackKey("A#4", -2.4*7+0.95+0.45 + 2.4 * 2 + 1.85 + 2.75 *2),
-]
+
 
 var createScene = async function () {
     // This creates a basic Babylon Scene object (non-mesh)
     const scene = new BABYLON.Scene(engine);
 
     // This creates and positions a free camera (non-mesh)
-    const camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 0);
-    camera.setPosition(new BABYLON.Vector3(-40, 30, -50))
+    const alpha =  3*Math.PI/2;
+    const beta = Math.PI/6;
+    const radius = 1000/scale;
+    const target = new BABYLON.Vector3(0, 0, 0);
+    
+    const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
     camera.attachControl(canvas, true);
 
     // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
@@ -65,9 +69,29 @@ var createScene = async function () {
     // Default intensity is 1. Let's dim the light a small amount
     light.intensity = 0.7;
 
-    keys.forEach(key => key.build(scene));
+    const keyParams = [
+        WhiteKey("C", 1.4, 2.3, -0.45, -2.4*6),
+        WhiteKey("D", 1.4, 2.4, 0, -2.4*5),
+        WhiteKey("E", 1.4, 2.3, 0.45, -2.4*4),
+        WhiteKey("F", 1.3, 2.4, -0.55, -2.4*3),
+        WhiteKey("G", 1.3, 2.3, -0.2, -2.4*2),
+        WhiteKey("A", 1.3, 2.3, 0.2, -2.4*1),
+        WhiteKey("B", 1.3, 2.4, 0.55, 0),
+        BlackKey("C#", -2.4*6+0.95),
+        BlackKey("D#", -2.4*6+0.95+2.85),
+        BlackKey("F#", -2.4*6+0.95+0.45 + 2.4 * 2 + 1.85),
+        BlackKey("G#", -2.4*6+0.95+0.45 + 2.4 * 2 + 1.85 + 2.75),
+        BlackKey("A#", -2.4*6+0.95+0.45 + 2.4 * 2 + 1.85 + 2.75 *2),
+    ]
 
-    camera.lockedTarget = new BABYLON.Vector3(-10, 0, 2);
+    const keys = new Set();
+    var referencePositionX = -2.4*7;
+    for (var octave=2; octave<=6; octave++) {
+        keyParams.forEach(key => {
+            keys.add(key.build(scene, octave, referencePositionX))
+        })
+        referencePositionX += 2.4*7;
+    }
 
     let pointerToKey = new Map()
 
@@ -82,19 +106,20 @@ var createScene = async function () {
                 if(pointerInfo.pickInfo.hit) {
                     const pickedMesh = pointerInfo.pickInfo.pickedMesh;
                     const pointerId = pointerInfo.event.pointerId;
-
-                    pickedMesh.position.y -= 0.5;
-                    pointerToKey.set(pointerId, {
-                        mesh: pickedMesh,
-                        note: piano.play(pointerInfo.pickInfo.pickedMesh.name)
-                    });
+                    if (keys.has(pickedMesh)) {
+                        pickedMesh.position.y -= 0.5/scale;
+                        pointerToKey.set(pointerId, {
+                            mesh: pickedMesh,
+                            note: piano.play(pointerInfo.pickInfo.pickedMesh.name)
+                        });
+                    }
                 }
                 break;
             case BABYLON.PointerEventTypes.POINTERUP:
                 console.log("POINTER UP");
                 const pointerId = pointerInfo.event.pointerId;
                 if (pointerToKey.has(pointerId)) {
-                    pointerToKey.get(pointerId).mesh.position.y += 0.5;
+                    pointerToKey.get(pointerId).mesh.position.y += 0.5/scale;
                     pointerToKey.get(pointerId).note.stop();
                     pointerToKey.delete(pointerId);
                 }
@@ -103,17 +128,18 @@ var createScene = async function () {
 
     });
 
-    const xrPromise = scene.createDefaultXRExperienceAsync({});
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
+    ground.position.x -= 0.1;
+
+    // const xrHelper = await scene.createDefaultXRExperienceAsync({
+    //     floorMeshes: [ground]
+    // });
     
-    return xrPromise.then((xrExperience) => {
-        console.log("Done, WebXR is enabled.");
-        return scene;
-    });
-
-
     // const featureManager = xrHelper.baseExperience.featuresManager;
 
     // featureManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
     //     xrInput: xrHelper.input,
     // });
+
+    return scene;
 };

@@ -1,18 +1,19 @@
 <html>
     <head>
         <title>Babylon Template</title>
-
-        <style>
-            body,#renderCanvas { width: 100%; height: 100%;}
-        </style>
-
         <script src="https://cdn.babylonjs.com/babylon.js"></script>
         <script src="soundfont-player.min.js"></script>
         <script src="piano-keys/piano_keys.js"></script>
+        <style>
+            html, body, #renderCanvas {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+
+        
     </head>
-
    <body>
-
     <canvas id="renderCanvas"></canvas>
     <script>
         const canvas = document.getElementById("renderCanvas"); // Get the canvas element
@@ -28,7 +29,5 @@
                 engine.resize();
         });
     </script>
-
    </body>
-
 </html>
