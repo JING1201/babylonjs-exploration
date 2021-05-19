@@ -175,9 +175,9 @@ const createScene = async function (engine) {
         snapPositions: [new BABYLON.Vector3(2.4*3.5/scale, 0, -10/scale)],
     });
 
-    // const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
-    //     xrInput: xrHelper.input,
-    // });
+    const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
+        xrInput: xrHelper.input,
+    });
 
     return scene;
 };
