@@ -124,11 +124,7 @@ const createScene = async function (engine) {
     
     console.log(referencePositionX);
     // Piano Frame
-    //const frame = buildFrame(scene, -2.4*23, referencePositionX-2.4*5)
-    BABYLON.SceneLoader.ImportMesh("frame", "./", "pianoFrame.babylon", scene, function (results) {
-        // Set the target of the camera to the first imported mesh
-        console.log(results);
-    });
+    BABYLON.SceneLoader.ImportMesh("frame", "https://raw.githubusercontent.com/JING1201/babylonjs-exploration/main/piano-keys/", "pianoFrame.babylon", scene);
 
     const pointerToKey = new Map()
     const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
