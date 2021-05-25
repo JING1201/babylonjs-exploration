@@ -1,4 +1,4 @@
-const scale = 65;
+const scale = 1;
 const keyHeight = 80;
 
 const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePositionX) {
@@ -10,16 +10,16 @@ const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePosit
         wholePositionX: wholePositionX,
 
         build(scene, octave, referencePositionX) {
-            var bottom = BABYLON.MeshBuilder.CreateBox("whiteKeyBottom", {width: bottomWidth/scale, height: 1.5/scale, depth: 4.5/scale}, scene);
-            var top = BABYLON.MeshBuilder.CreateBox("whiteKeyTop", {width: topWidth/scale, height: 1.5/scale, depth: 5/scale}, scene);
-            top.position.z =  4.75/scale;
-            top.position.x += topPositionX/scale;
+            var bottom = BABYLON.MeshBuilder.CreateBox("whiteKeyBottom", {width: bottomWidth*scale, height: 1.5*scale, depth: 4.5*scale}, scene);
+            var top = BABYLON.MeshBuilder.CreateBox("whiteKeyTop", {width: topWidth*scale, height: 1.5*scale, depth: 5*scale}, scene);
+            top.position.z =  4.75*scale;
+            top.position.x += topPositionX*scale;
 
             const key = BABYLON.Mesh.MergeMeshes([bottom, top], true, false, null, false, false);
-            key.position.x = referencePositionX/scale + wholePositionX/scale;
+            key.position.x = referencePositionX*scale + wholePositionX*scale;
             key.name = note+octave;
             
-            key.position.y += keyHeight/scale;
+            key.position.y += keyHeight*scale;
 
             return key;
         }
@@ -35,39 +35,18 @@ const BlackKey = function (note, positionX) {
             const blackMat = new BABYLON.StandardMaterial("black");
             blackMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
 
-            const key = BABYLON.MeshBuilder.CreateBox(note+octave, {width: 1.4/scale, height: 2/scale, depth: 5/scale}, scene);
-            key.position.z += 4.75/scale;
-            key.position.y += 0.25/scale;
-            key.position.x = referencePositionX/scale + positionX/scale;
+            const key = BABYLON.MeshBuilder.CreateBox(note+octave, {width: 1.4*scale, height: 2*scale, depth: 5*scale}, scene);
+            key.position.z += 4.75*scale;
+            key.position.y += 0.25*scale;
+            key.position.x = referencePositionX*scale + positionX*scale;
             key.material = blackMat;
             
-            key.position.y += keyHeight/scale;
+            key.position.y += keyHeight*scale;
 
             return key;
         }
     }
 }
-
-const buildFrame = function(scene, leftPositionX, rightPositionX) {
-    const frameLeft = BABYLON.MeshBuilder.CreateBox("frameLeft", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
-    frameLeft.position = new BABYLON.Vector3(leftPositionX/scale, (keyHeight+2)/2/scale, 4/scale);
-    const frameRight = BABYLON.MeshBuilder.CreateBox("frameRight", {width: 2.4/scale, height: (keyHeight+2)/scale, depth: 15/scale}, scene);
-    frameRight.position = new BABYLON.Vector3(rightPositionX/scale, (keyHeight+2)/2/scale, 4/scale);
-    const frameBack = BABYLON.MeshBuilder.CreateBox("frameBack", {width: (2.4*52)/scale, height: (keyHeight+10)/scale, depth: 5/scale}, scene);
-    frameBack.position = new BABYLON.Vector3(2.4*3.5/scale, (keyHeight+10)/2/scale, 9/scale);
-    const wingLeft = BABYLON.MeshBuilder.CreateBox("wingLeft", {width: 2.4/scale, height: 8/scale, depth: 5/scale}, scene);
-    wingLeft.position =  new BABYLON.Vector3(leftPositionX/scale, (keyHeight+6)/scale, 9/scale);
-    const wingRight = BABYLON.MeshBuilder.CreateBox("wingRight", {width: 2.4/scale, height: 8/scale, depth: 5/scale}, scene);
-    wingRight.position =  new BABYLON.Vector3(rightPositionX/scale, (keyHeight+6)/scale, 9/scale);
-    
-    const frame = BABYLON.Mesh.MergeMeshes([frameLeft, frameRight, frameBack, wingLeft, wingRight], true, false, null, false, false);
-    const frameMat = new BABYLON.StandardMaterial("frameMat");
-    frameMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
-    frame.material = frameMat;
-
-    return frame;
-}
-
 
 
 const createScene = async function (engine) {
@@ -75,7 +54,7 @@ const createScene = async function (engine) {
 
     const alpha =  3*Math.PI/2;
     const beta = Math.PI/50;
-    const radius = 220/scale;
+    const radius = 3.3;
     const target = new BABYLON.Vector3(0, 0, 0);
     
     const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
@@ -121,6 +100,18 @@ const createScene = async function (engine) {
 
     //Octave 8
     keys.add(WhiteKey("C", 2.3, 2.3, 0, -2.4*6).build(scene, 8, referencePositionX))
+
+    BABYLON.Mesh.prototype.scaleFromPivot = function(pivotPoint, sx, sy, sz) {
+        var _sx = sx / this.scaling.x;
+        var _sy = sy / this.scaling.y;
+        var _sz = sz / this.scaling.z;
+        this.scaling = new BABYLON.Vector3(sx, sy, sz); 
+        this.position = new BABYLON.Vector3(pivotPoint.x + _sx * (this.position.x - pivotPoint.x), pivotPoint.y + _sy * (this.position.y - pivotPoint.y), pivotPoint.z + _sz * (this.position.z - pivotPoint.z));
+    }
+
+    keys.forEach(key => {
+        key.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), 0.015, 0.015, 0.015);
+    })
     
     console.log(referencePositionX);
     // Piano Frame
@@ -136,7 +127,7 @@ const createScene = async function (engine) {
                     const pickedMesh = pointerInfo.pickInfo.pickedMesh;
                     const pointerId = pointerInfo.event.pointerId;
                     if (keys.has(pickedMesh)) {
-                        pickedMesh.position.y -= 0.5/scale;
+                        pickedMesh.position.y -= 0.5*scale;
                         pointerToKey.set(pointerId, {
                             mesh: pickedMesh,
                             note: piano.play(pointerInfo.pickInfo.pickedMesh.name)
@@ -147,7 +138,7 @@ const createScene = async function (engine) {
             case BABYLON.PointerEventTypes.POINTERUP:
                 const pointerId = pointerInfo.event.pointerId;
                 if (pointerToKey.has(pointerId)) {
-                    pointerToKey.get(pointerId).mesh.position.y += 0.5/scale;
+                    pointerToKey.get(pointerId).mesh.position.y += 0.5*scale;
                     pointerToKey.get(pointerId).note.stop();
                     pointerToKey.delete(pointerId);
                 }
@@ -158,7 +149,7 @@ const createScene = async function (engine) {
 
     const groundMat = new BABYLON.StandardMaterial("groundMat");
     groundMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400/scale, height: 400/scale});
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400*scale, height: 400*scale});
     ground.material = groundMat;
 
     const xrHelper = await scene.createDefaultXRExperienceAsync();
@@ -173,7 +164,7 @@ const createScene = async function (engine) {
     const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
         xrInput: xrHelper.input,
         floorMeshes: [ground],
-        snapPositions: [new BABYLON.Vector3(2.4*3.5/scale, 0, -10/scale)],
+        snapPositions: [new BABYLON.Vector3(2.4*3.5*scale, 0, -10*scale)],
     });
 
     const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
