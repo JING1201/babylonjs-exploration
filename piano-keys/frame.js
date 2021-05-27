@@ -1,4 +1,4 @@
-const scale = 0.015;
+const scale = 1;
 const keyHeight = 80;
 
 const buildFrame = function(scene, leftPositionX, rightPositionX) {
