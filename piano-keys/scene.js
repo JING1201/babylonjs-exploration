@@ -2,10 +2,10 @@ const WhiteKey = function (note, topWidth, bottomWidth, topPositionX, wholePosit
     return {
         build(scene, register, referencePositionX) {
             // Create bottom part
-            var bottom = BABYLON.MeshBuilder.CreateBox("whiteKeyBottom", {width: bottomWidth, height: 1.5, depth: 4.5}, scene);
+            const bottom = BABYLON.MeshBuilder.CreateBox("whiteKeyBottom", {width: bottomWidth, height: 1.5, depth: 4.5}, scene);
 
             // Create top part
-            var top = BABYLON.MeshBuilder.CreateBox("whiteKeyTop", {width: topWidth, height: 1.5, depth: 5}, scene);
+            const top = BABYLON.MeshBuilder.CreateBox("whiteKeyTop", {width: topWidth, height: 1.5, depth: 5}, scene);
             top.position.z =  4.75;
             top.position.x += topPositionX;
 
@@ -25,7 +25,7 @@ const BlackKey = function (note, wholePositionX) {
             // Create black color material
             const blackMat = new BABYLON.StandardMaterial("black");
             blackMat.diffuseColor = new BABYLON.Color3(0, 0, 0);
-            
+
             // Create black key
             const key = BABYLON.MeshBuilder.CreateBox(note + register, {width: 1.4, height: 2, depth: 5}, scene);
             key.position.z += 4.75;
@@ -47,17 +47,17 @@ BABYLON.Mesh.prototype.scaleFromPivot = function(pivotPoint, sx, sy, sz) {
 }
 
 const createScene = async function(engine) {
-    const scene = new BABYLON.Scene(engine);
     const scale = 0.015;
+    const scene = new BABYLON.Scene(engine);
 
     const alpha =  3*Math.PI/2;
     const beta = Math.PI/50;
     const radius = 220*scale;
     const target = new BABYLON.Vector3(0, 0, 0);
-    
+
     const camera = new BABYLON.ArcRotateCamera("Camera", alpha, beta, radius, target, scene);
     camera.attachControl(canvas, true);
-    
+
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 0.6;
 
@@ -75,12 +75,12 @@ const createScene = async function(engine) {
         BlackKey("A#", -0.85),
         WhiteKey("B", 1.3, 2.4, 0.55, 0)
     ]
-    
+
     const keys = new Set();
 
     // Register 1 through 7
     var referencePositionX = -2.4*14;
-    for (var octave = 1; octave <= 7; octave++) {
+    for (let octave = 1; octave <= 7; octave++) {
         keyParams.forEach(key => {
             keys.add(key.build(scene, octave, referencePositionX))
         })
@@ -92,19 +92,21 @@ const createScene = async function(engine) {
     keyParams.slice(10, 12).forEach(key => {
         keys.add(key.build(scene, 0, -2.4*21))
     })
-    
+
     // Register 8
     keys.add(WhiteKey("C", 2.3, 2.3, 0, -2.4*6).build(scene, 8, 84))
 
-    keys.forEach(key => {
-        key.position.y += 80;
-        key.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
-    })
-    
+    // Import and scale piano frame
     BABYLON.SceneLoader.ImportMesh("frame", "https://raw.githubusercontent.com/JING1201/babylonjs-exploration/main/piano-keys/", "pianoFrame.babylon", scene, function(meshes) {
         const frame = meshes[0];
         frame.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
     });
+
+    // Lift and scale piano keyboard
+    keys.forEach(key => {
+        key.position.y += 80;
+        key.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
+    })
 
     const pointerToKey = new Map()
     const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
@@ -113,27 +115,26 @@ const createScene = async function(engine) {
         switch (pointerInfo.type) {
             case BABYLON.PointerEventTypes.POINTERDOWN:
                 if(pointerInfo.pickInfo.hit) {
-                    const pickedMesh = pointerInfo.pickInfo.pickedMesh;
-                    const pointerId = pointerInfo.event.pointerId;
+                    let pickedMesh = pointerInfo.pickInfo.pickedMesh;
+                    let pointerId = pointerInfo.event.pointerId;
                     if (keys.has(pickedMesh)) {
-                        pickedMesh.position.y -= 0.5*scale;
+                        pickedMesh.position.y -= 0.5*scale; // Move the key downward
                         pointerToKey.set(pointerId, {
                             mesh: pickedMesh,
-                            note: piano.play(pointerInfo.pickInfo.pickedMesh.name)
+                            note: piano.play(pointerInfo.pickInfo.pickedMesh.name) // Play the sound of the note
                         });
                     }
                 }
                 break;
             case BABYLON.PointerEventTypes.POINTERUP:
-                const pointerId = pointerInfo.event.pointerId;
+                let pointerId = pointerInfo.event.pointerId;
                 if (pointerToKey.has(pointerId)) {
-                    pointerToKey.get(pointerId).mesh.position.y += 0.5*scale;
-                    pointerToKey.get(pointerId).note.stop();
+                    pointerToKey.get(pointerId).mesh.position.y += 0.5*scale; // Move the key upward
+                    pointerToKey.get(pointerId).note.stop(); // Stop the sound of the note
                     pointerToKey.delete(pointerId);
                 }
                 break;
         }
-
     });
 
     const xrHelper = await scene.createDefaultXRExperienceAsync();
