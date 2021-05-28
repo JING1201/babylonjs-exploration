@@ -154,9 +154,15 @@ const createScene = async function(engine) {
         snapPositions: [new BABYLON.Vector3(2.4*3.5*scale, 0, -10*scale)],
     });
 
-    const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
-        xrInput: xrHelper.input,
-    });
+    try {
+        const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
+            xrInput: xrHelper.input,
+        });
+    } catch (error) {
+        console.log(error);
+        console.log("If applicable, please enable the WebXR Hand Input flag in your browser."); 
+    }
+    
 
     return scene;
 }
