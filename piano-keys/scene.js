@@ -1,4 +1,4 @@
-const buildKey = function (scene, props) {
+const buildKey = function (scene, parent, props) {
     if (props.type === "white") {
         /*
         Props for building a white key should contain: 
@@ -20,6 +20,7 @@ const buildKey = function (scene, props) {
         const key = BABYLON.Mesh.MergeMeshes([bottom, top], true, false, null, false, false);
         key.position.x = props.referencePositionX + props.wholePositionX;
         key.name = props.note + props.register;
+        key.parent = parent;
 
         return key;
     }
@@ -42,12 +43,13 @@ const buildKey = function (scene, props) {
         key.position.y += 0.25;
         key.position.x = props.referencePositionX + props.wholePositionX;
         key.material = blackMat;
+        key.parent = parent;
 
         return key;
     }
 }
 
-BABYLON.Mesh.prototype.scaleFromPivot = function(pivotPoint, sx, sy, sz) {
+BABYLON.TransformNode.prototype.scaleFromPivot = function(pivotPoint, sx, sy, sz) {
     var _sx = sx / this.scaling.x;
     var _sy = sy / this.scaling.y;
     var _sz = sz / this.scaling.z;
@@ -70,6 +72,9 @@ const createScene = async function(engine) {
     const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 0.6;
 
+    // Transform Node that acts as the parent of all piano keys
+    const keyboard = new BABYLON.TransformNode("keyboard");
+
     const keyParams = [
         {type: "white", note: "C", topWidth: 1.4, bottomWidth: 2.3, topPositionX: -0.45, wholePositionX: -14.4},
         {type: "black", note: "C#", wholePositionX: -13.45},
@@ -91,41 +96,36 @@ const createScene = async function(engine) {
     var referencePositionX = -2.4*14;
     for (let octave = 1; octave <= 7; octave++) {
         keyParams.forEach(key => {
-            keys.add(buildKey(scene, Object.assign({register: octave, referencePositionX: referencePositionX}, key)));
+            keys.add(buildKey(scene, keyboard, Object.assign({register: octave, referencePositionX: referencePositionX}, key)));
         })
         referencePositionX += 2.4*7;
     }
 
     // Register 0
-    keys.add(buildKey(scene, {type: "white", note: "A", topWidth: 1.9, bottomWidth: 2.3, topPositionX: -0.20, wholePositionX: -2.4, register: 0, referencePositionX: -2.4*21}));
+    keys.add(buildKey(scene, keyboard, {type: "white", note: "A", topWidth: 1.9, bottomWidth: 2.3, topPositionX: -0.20, wholePositionX: -2.4, register: 0, referencePositionX: -2.4*21}));
     keyParams.slice(10, 12).forEach(key => {
-        keys.add(buildKey(scene, Object.assign({register: 0, referencePositionX: -2.4*21}, key)));
+        keys.add(buildKey(scene, keyboard, Object.assign({register: 0, referencePositionX: -2.4*21}, key)));
     })
 
     // Register 8
-    keys.add(buildKey(scene, {type: "white", note: "C", topWidth: 2.3, bottomWidth: 2.3, topPositionX: 0, wholePositionX: -2.4*6, register: 8, referencePositionX: 84}));
+    keys.add(buildKey(scene, keyboard, {type: "white", note: "C", topWidth: 2.3, bottomWidth: 2.3, topPositionX: 0, wholePositionX: -2.4*6, register: 8, referencePositionX: 84}));
+
+    // Transform node that acts as the parent of all piano components
+    const piano = new BABYLON.TransformNode("piano");
+    keyboard.parent = piano;
 
     // Import and scale piano frame
     BABYLON.SceneLoader.ImportMesh("frame", "https://raw.githubusercontent.com/JING1201/babylonjs-exploration/main/piano-keys/", "pianoFrame.babylon", scene, function(meshes) {
         const frame = meshes[0];
-        frame.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
+        frame.parent = piano;
     });
 
-    const box = BABYLON.MeshBuilder.CreateBox("box", {});
-    box.isVisible = false;
-
-    // Lift and scale piano keyboard
-    keys.forEach(key => {
-        key.parent = box;
-        // key.position.y += 80;
-        // key.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
-    })
-
-    box.position.y += 80;
-    box.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
+    // Lift the piano keyboard and scale the piano
+    keyboard.position.y += 80;
+    piano.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
 
     const pointerToKey = new Map()
-    const piano = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
+    const pianoSound = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
 
     scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
@@ -137,7 +137,7 @@ const createScene = async function(engine) {
                         pickedMesh.position.y -= 0.5; // Move the key downward
                         pointerToKey.set(pointerId, {
                             mesh: pickedMesh,
-                            note: piano.play(pointerInfo.pickInfo.pickedMesh.name) // Play the sound of the note
+                            note: pianoSound.play(pointerInfo.pickInfo.pickedMesh.name) // Play the sound of the note
                         });
                     }
                 }
