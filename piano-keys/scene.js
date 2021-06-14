@@ -159,28 +159,18 @@ const createScene = async function(engine) {
 
     const featuresManager = xrHelper.baseExperience.featuresManager;
 
-    const pointerSelection = featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable", {
+    featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable", {
         xrInput: xrHelper.input,
         enablePointerSelectionOnAllControllers: true        
     });
 
     const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 400, height: 400});
 
-    const teleportation = featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
+    featuresManager.enableFeature(BABYLON.WebXRFeatureName.TELEPORTATION, "stable", {
         xrInput: xrHelper.input,
         floorMeshes: [ground],
         snapPositions: [new BABYLON.Vector3(2.4*3.5*scale, 0, -10*scale)],
     });
-
-    try {
-        const handTracking = featuresManager.enableFeature(BABYLON.WebXRFeatureName.HAND_TRACKING, "latest", {
-            xrInput: xrHelper.input,
-        });
-    } catch (error) {
-        console.log(error);
-        console.log("If applicable, please enable the WebXR Hand Input flag in your browser."); 
-    }
-    
 
     return scene;
 }
