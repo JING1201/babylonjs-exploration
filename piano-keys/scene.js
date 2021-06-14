@@ -130,6 +130,7 @@ const createScene = async function(engine) {
     scene.onPointerObservable.add((pointerInfo) => {
         switch (pointerInfo.type) {
             case BABYLON.PointerEventTypes.POINTERDOWN:
+                // Only take action if the pointer is down on a mesh
                 if(pointerInfo.pickInfo.hit) {
                     let pickedMesh = pointerInfo.pickInfo.pickedMesh;
                     let pointerId = pointerInfo.event.pointerId;
@@ -144,6 +145,7 @@ const createScene = async function(engine) {
                 break;
             case BABYLON.PointerEventTypes.POINTERUP:
                 let pointerId = pointerInfo.event.pointerId;
+                // Only take action if the released pointer was recorded in pointerToKey
                 if (pointerToKey.has(pointerId)) {
                     pointerToKey.get(pointerId).mesh.position.y += 0.5; // Move the key upward
                     pointerToKey.get(pointerId).note.stop(); // Stop the sound of the note
