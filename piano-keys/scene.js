@@ -49,12 +49,12 @@ const buildKey = function (scene, parent, props) {
     }
 }
 
-BABYLON.TransformNode.prototype.scaleFromPivot = function(pivotPoint, sx, sy, sz) {
-    var _sx = sx / this.scaling.x;
-    var _sy = sy / this.scaling.y;
-    var _sz = sz / this.scaling.z;
-    this.scaling = new BABYLON.Vector3(sx, sy, sz); 
-    this.position = new BABYLON.Vector3(pivotPoint.x + _sx * (this.position.x - pivotPoint.x), pivotPoint.y + _sy * (this.position.y - pivotPoint.y), pivotPoint.z + _sz * (this.position.z - pivotPoint.z));
+const scaleFromPivot = function(transformNode, pivotPoint, sx, sy, sz) {
+    const _sx = sx / transformNode.scaling.x;
+    const _sy = sy / transformNode.scaling.y;
+    const _sz = sz / transformNode.scaling.z;
+    transformNode.scaling = new BABYLON.Vector3(sx, sy, sz); 
+    transformNode.position = new BABYLON.Vector3(pivotPoint.x + _sx * (transformNode.position.x - pivotPoint.x), pivotPoint.y + _sy * (transformNode.position.y - pivotPoint.y), pivotPoint.z + _sz * (transformNode.position.z - pivotPoint.z));
 }
 
 const createScene = async function(engine) {
@@ -122,7 +122,7 @@ const createScene = async function(engine) {
 
     // Lift the piano keyboard and scale the piano
     keyboard.position.y += 80;
-    piano.scaleFromPivot(new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
+    scaleFromPivot(piano, new BABYLON.Vector3(0, 0, 0), scale, scale, scale);
 
     const pointerToKey = new Map()
     const pianoSound = await Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano');
